@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CountUp — Simple & Powerful Counter</title>
+  <meta name="description" content="CountUp: modern, hızlı ve kullanımı kolay sayaç uygulaması. Çoklu sayaç, otomatik reset, yedekleme ve daha fazlası." />
+  <meta name="theme-color" content="#0aa4a6" />
+
+  <style>
+    :root{
+      --bg: #0b1220;
+      --text: rgba(255,255,255,.92);
+      --muted: rgba(255,255,255,.70);
+      --muted2: rgba(255,255,255,.55);
+      --brand: #22c1c3;
+      --brand2: #6bd6ff;
+      --shadow: 0 18px 50px rgba(0,0,0,.35);
+      --radius: 18px;
+    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{
+      margin:0;
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, "Apple Color Emoji","Segoe UI Emoji";
+      color: var(--text);
+      background:
+        radial-gradient(1200px 800px at 15% 10%, rgba(34,193,195,.35), transparent 55%),
+        radial-gradient(900px 700px at 90% 15%, rgba(107,214,255,.24), transparent 60%),
+        radial-gradient(900px 900px at 60% 95%, rgba(132,94,247,.20), transparent 60%),
+        linear-gradient(180deg, #070b14, var(--bg));
+      overflow-x:hidden;
+    }
+    a{ color:inherit; text-decoration:none; }
+    .container{ width:min(1100px, 92vw); margin:0 auto; }
+
+    header{
+      position:sticky; top:0; z-index:20;
+      backdrop-filter: blur(10px);
+      background: linear-gradient(180deg, rgba(7,11,20,.78), rgba(7,11,20,.35));
+      border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+    .nav{
+      display:flex; align-items:center; justify-content:space-between;
+      gap:16px;
+      padding:14px 0;
+    }
+    .brandRow{ display:flex; align-items:center; gap:10px; font-weight:700; }
+    .logo{
+      width:34px; height:34px; border-radius:10px;
+      display:grid; place-items:center;
+      background: linear-gradient(135deg, rgba(34,193,195,.22), rgba(107,214,255,.18));
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 10px 30px rgba(0,0,0,.25);
+    }
+    .navlinks{
+      display:flex; gap:18px; align-items:center;
+      color: var(--muted);
+      font-size:14px;
+    }
+    .navlinks a{ padding:8px 10px; border-radius:10px; }
+    .navlinks a:hover{ background: rgba(255,255,255,.06); color: var(--text); }
+
+    .btn{
+      display:inline-flex; align-items:center; justify-content:center; gap:10px;
+      padding:10px 14px;
+      border-radius:12px;
+      border: 1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      font-weight:600;
+      font-size:14px;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      user-select:none;
+    }
+    .btn:hover{ transform: translateY(-1px); background: rgba(255,255,255,.09); border-color: rgba(255,255,255,.18); }
+    .btn.primary{
+      border: 1px solid rgba(34,193,195,.35);
+      background: linear-gradient(135deg, rgba(34,193,195,.26), rgba(107,214,255,.18));
+    }
+
+    main{ padding: 34px 0 60px; }
+
+    /* Status banner */
+    .statusBanner{
+      margin: 18px 0 0;
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      border-radius: 16px;
+      padding: 12px 14px;
+      display:flex; gap:12px; align-items:flex-start; justify-content:space-between;
+      box-shadow: 0 14px 40px rgba(0,0,0,.20);
+    }
+    .statusBanner strong{ display:block; margin-bottom:3px; }
+    .statusBanner p{ margin:0; color: var(--muted); font-size: 13.5px; line-height:1.45; }
+    .statusTag{
+      flex: 0 0 auto;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(0,0,0,.18);
+      color: rgba(255,255,255,.85);
+      white-space: nowrap;
+    }
+    .hide{ display:none !important; }
+
+    .hero{
+      display:grid;
+      grid-template-columns: 1.05fr .95fr;
+      gap: 26px;
+      align-items:center;
+      margin-top: 14px;
+    }
+    @media (max-width: 900px){
+      .hero{ grid-template-columns: 1fr; }
+    }
+
+    .badge{
+      display:inline-flex; align-items:center; gap:10px;
+      font-size:13px;
+      color: var(--muted);
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+      padding:8px 12px;
+      border-radius:999px;
+      width: fit-content;
+    }
+    .badge .dot{
+      width:10px; height:10px; border-radius:999px;
+      background: linear-gradient(135deg, var(--brand), var(--brand2));
+      box-shadow: 0 0 0 6px rgba(34,193,195,.12);
+    }
+
+    h1{
+      margin: 14px 0 10px;
+      font-size: clamp(30px, 4vw, 44px);
+      line-height: 1.08;
+      letter-spacing: -0.6px;
+    }
+    .lead{
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.55;
+    }
+
+    .quick{
+      display:flex; flex-wrap:wrap; gap:10px;
+      margin: 18px 0 26px;
+    }
+    .pill{
+      display:inline-flex; align-items:center; gap:10px;
+      padding:10px 12px;
+      border-radius: 999px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.04);
+      color: rgba(255,255,255,.78);
+      font-size: 13px;
+    }
+
+    .heroCard{
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.08), rgba(255,255,255,.03));
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow:hidden;
+    }
+    .heroImgWrap{ display:grid; place-items:center; padding: 10px; }
+    .heroImg{
+      width: min(1024px, 100%);
+      aspect-ratio: 1024 / 500;
+      border-radius: 16px;
+      border: 1px solid rgba(255,255,255,.10);
+      box-shadow: 0 16px 50px rgba(0,0,0,.38);
+      overflow:hidden;
+      background: rgba(255,255,255,.03);
+      transform: translateY(0);
+      transition: transform .25s ease;
+    }
+    .heroImg:hover{ transform: translateY(-3px); }
+    .heroImg img{ width:100%; height:100%; object-fit: cover; display:block; }
+
+    .section{ margin-top: 56px; }
+    .sectionTitle{
+      display:flex; align-items:flex-end; justify-content:space-between; gap:12px;
+      margin-bottom: 16px;
+    }
+    .sectionTitle h2{ margin:0; font-size: 20px; letter-spacing: -.2px; }
+    .sectionTitle p{ margin:0; color: var(--muted2); font-size: 13px; }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+    }
+    @media (max-width: 900px){ .grid{ grid-template-columns: 1fr; } }
+
+    .card{
+      border: 1px solid rgba(255,255,255,.10);
+      background: linear-gradient(180deg, rgba(255,255,255,.07), rgba(255,255,255,.03));
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: 0 14px 40px rgba(0,0,0,.25);
+      transform: translateY(0);
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+    }
+    .card:hover{
+      transform: translateY(-2px);
+      background: linear-gradient(180deg, rgba(255,255,255,.09), rgba(255,255,255,.04));
+      border-color: rgba(255,255,255,.16);
+    }
+    .card h3{ margin: 10px 0 6px; font-size: 15px; }
+    .card p{ margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.5; }
+    .ic{
+      width:38px; height:38px;
+      border-radius: 12px;
+      display:grid; place-items:center;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.05);
+    }
+
+    .marquee{
+      border: 1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      border-radius: var(--radius);
+      overflow:hidden;
+      box-shadow: var(--shadow);
+      position:relative;
+    }
+    .marquee:before,.marquee:after{
+      content:"";
+      position:absolute; top:0; bottom:0;
+      width: 90px;
+      pointer-events:none;
+      z-index:2;
+    }
+    .marquee:before{ left:0; background: linear-gradient(90deg, rgba(7,11,20,1), rgba(7,11,20,0)); }
+    .marquee:after{ right:0; background: linear-gradient(270deg, rgba(7,11,20,1), rgba(7,11,20,0)); }
+
+    .track{
+      display:flex;
+      gap: 16px;
+      padding: 16px;
+      width: max-content;
+      animation: scroll 28s linear infinite;
+    }
+    .marquee:hover .track{ animation-play-state: paused; }
+    @keyframes scroll{ from{ transform: translateX(0);} to{ transform: translateX(-50%);} }
+
+    .shot{
+      width: 220px;
+      height: 460px;
+      border-radius: 18px;
+      overflow:hidden;
+      border:1px solid rgba(255,255,255,.12);
+      background: rgba(255,255,255,.04);
+      box-shadow: 0 14px 40px rgba(0,0,0,.35);
+      transform: translateY(0) scale(1);
+      transition: transform .20s ease, filter .20s ease;
+      flex: 0 0 auto;
+      position:relative;
+    }
+    .shot:hover{ transform: translateY(-4px) scale(1.02); filter: saturate(1.05); }
+    .shot img{ width:100%; height:100%; object-fit: cover; display:block; }
+    .shot .label{
+      position:absolute; left:10px; top:10px;
+      padding:6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      color: rgba(255,255,255,.9);
+      background: rgba(0,0,0,.35);
+      border: 1px solid rgba(255,255,255,.12);
+      backdrop-filter: blur(8px);
+    }
+
+    .reveal{
+      opacity:0;
+      transform: translateY(10px);
+      transition: opacity .6s ease, transform .6s ease;
+    }
+    .reveal.show{ opacity:1; transform: translateY(0); }
+
+    footer{
+      margin-top: 58px;
+      padding: 26px 0 34px;
+      color: var(--muted2);
+      border-top: 1px solid rgba(255,255,255,.08);
+      background: rgba(0,0,0,.10);
+    }
+    .footerRow{
+      display:flex; justify-content:space-between; gap:14px; flex-wrap:wrap;
+      font-size: 13px;
+    }
+    .tiny{ font-size:12px; color: rgba(255,255,255,.5); }
+
+    @media (prefers-reduced-motion: reduce){
+      .track{ animation: none; }
+      .btn,.card,.shot,.heroImg{ transition:none; }
+      .reveal{ transition:none; opacity:1; transform:none; }
+    }
+  </style>
+</head>
+
+<body>
+<header>
+  <div class="container">
+    <div class="nav">
+      <div class="brandRow">
+        <div class="logo" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M7 7h10v10H7V7Z" stroke="white" stroke-width="1.6" opacity=".9"/>
+            <path d="M9 10h6M9 13h4" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+          </svg>
+        </div>
+        <div>CountUp</div>
+      </div>
+
+      <nav class="navlinks" aria-label="Sayfa bağlantıları">
+        <a href="#features">Özellikler</a>
+        <a href="#screens">Ekran Görüntüleri</a>
+        <a href="#download">İndir</a>
+      </nav>
+
+      <div>
+        <a class="btn primary download-btn" href="#" target="_blank" rel="noopener">Download</a>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <!-- TEST/LIVE BİLGİ BANDI -->
+  <div id="statusBanner" class="statusBanner hide" role="status" aria-live="polite">
+    <div>
+      <strong id="statusTitle">Test sürümü yayında</strong>
+      <p id="statusText">
+        Uygulama şu an testte. Bu link aynı kalır; canlıya geçince herkes erişebilir.
+        Test kullanıcısı değilsen Play sayfası “uygun değil” benzeri uyarı gösterebilir.
+      </p>
+    </div>
+    <div id="statusTag" class="statusTag">TEST</div>
+  </div>
+
+  <section class="hero">
+    <div class="reveal">
+      <div class="badge"><span class="dot"></span> Basit. Hızlı. Güçlü sayaç.</div>
+      <h1>CountUp ile her şeyi kolayca takip et.</h1>
+      <p class="lead">
+        CountUp; çoklu sayaç, hızlı artır/azalt, otomatik reset ve yedekleme gibi özelliklerle günlük takibini pratik hale getirir.
+        Minimal tasarım, akıcı kullanım.
+      </p>
+
+      <div class="quick">
+        <div class="pill" title="Çoklu sayaç">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 7h10v10H7V7Z" stroke="white" stroke-width="1.6" opacity=".9"/>
+          </svg>
+          Çoklu Sayaç
+        </div>
+        <div class="pill" title="Otomatik reset">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M12 6v6l4 2" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" opacity=".9"/>
+            <path d="M21 12a9 9 0 1 1-3-6.7" stroke="white" stroke-width="1.6" stroke-linecap="round" opacity=".9"/>
+          </svg>
+          Otomatik Reset
+        </div>
+        <div class="pill" title="Yedekleme">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path d="M7 18a4 4 0 1 1 .5-7.97A5 5 0 0 1 20 12a3 3 0 0 1-1 5.83H7Z"
+                  stroke="white" stroke-width="1.6" opacity=".9"/>
+          </svg>
+          Local / Drive Backup
+        </div>
+      </div>
+
+      <div class="cta" id="download" style="display:flex; gap:10px; flex-wrap:wrap; align-items:center;">
+        <a class="btn primary download-btn" href="#" target="_blank" rel="noopener">Download</a>
+        <a class="btn" href="mailto:mobilboyut@gmail.com">Contact</a>
+      </div>
+
+      <p class="tiny" style="margin-top:10px;">
+        Play Store linkin sabittir: paket adı değişmedikçe aynı kalır.
+      </p>
+    </div>
+
+    <div class="heroCard reveal">
+      <div class="heroImgWrap">
+        <div class="heroImg">
+          <img src="CountUp.png" alt="CountUp tanıtım görseli (1024x500)" width="1024" height="500" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="section">
+    <div class="sectionTitle reveal">
+      <div>
+        <h2>Öne çıkan özellikler</h2>
+        <p>Hızlı kullanım + temiz arayüz + pratik ayarlar.</p>
+      </div>
+      <p class="tiny">Dark/Light • Auto Reset • Backup</p>
+    </div>
+
+    <div class="grid">
+      <article class="card reveal">
+        <div class="ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M7 12h10" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+            <path d="M12 7v10" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Tek dokunuşla artır / azalt</h3>
+        <p>Sayaçlarını saniyeler içinde güncelle. Tam ekran moduyla daha da hızlı.</p>
+      </article>
+
+      <article class="card reveal">
+        <div class="ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M12 6v6l4 2" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M21 12a9 9 0 1 1-3-6.7" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h3>Otomatik reset</h3>
+        <p>Günlük / haftalık / aylık sıfırlama ile düzenli takip. Minimum/maximum limit desteği.</p>
+      </article>
+
+      <article class="card reveal">
+        <div class="ic" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
+            <path d="M7 18a4 4 0 1 1 .5-7.97A5 5 0 0 1 20 12a3 3 0 0 1-1 5.83H7Z"
+                  stroke="white" stroke-width="1.8"/>
+          </svg>
+        </div>
+        <h3>Yedekle & geri yükle</h3>
+        <p>Local ve Google Drive yedekleme ile verilerin güvende. Cihaz değiştirirken rahat et.</p>
+      </article>
+    </div>
+  </section>
+
+  <section id="screens" class="section">
+    <div class="sectionTitle reveal">
+      <div>
+        <h2>Ekran görüntüleri</h2>
+        <p>Üzerine gelince durur — hover ile büyür.</p>
+      </div>
+      <p class="tiny">İstersen hızını CSS/JS’ten değiştirebilirsin.</p>
+    </div>
+
+    <div class="marquee reveal" aria-label="CountUp ekran görüntüleri galerisi">
+      <div class="track" id="track">
+        <div class="shot"><span class="label">About</span>
+          <img src="Screenshot_2025-12-22-21-28-55-541_com.example.countup.jpg" alt="CountUp About ekranı" />
+        </div>
+        <div class="shot"><span class="label">My Counters</span>
+          <img src="Screenshot_2025-12-22-20-59-06-062_com.example.countup.jpg" alt="CountUp My Counters ekranı" />
+        </div>
+        <div class="shot"><span class="label">Cards</span>
+          <img src="Screenshot_2025-12-22-20-59-11-173_com.example.countup.jpg" alt="CountUp sayaç kartları" />
+        </div>
+        <div class="shot"><span class="label">Details</span>
+          <img src="Screenshot_2025-12-22-20-59-17-462_com.example.countup.jpg" alt="CountUp Counter Details ekranı" />
+        </div>
+        <div class="shot"><span class="label">Auto Reset</span>
+          <img src="Screenshot_2025-12-22-20-59-29-403_com.example.countup.jpg" alt="CountUp Auto Reset ayarları" />
+        </div>
+        <div class="shot"><span class="label">Full Screen</span>
+          <img src="Screenshot_2025-12-22-20-59-35-994_com.example.countup.jpg" alt="CountUp tam ekran sayaç" />
+        </div>
+        <div class="shot"><span class="label">Counter</span>
+          <img src="Screenshot_2025-12-22-20-59-41-043_com.example.countup.jpg" alt="CountUp counter ekranı" />
+        </div>
+        <div class="shot"><span class="label">Dark Mode</span>
+          <img src="Screenshot_2025-12-22-21-00-09-348_com.example.countup.jpg" alt="CountUp karanlık tema" />
+        </div>
+        <div class="shot"><span class="label">Archive</span>
+          <img src="Screenshot_2025-12-22-21-00-15-519_com.example.countup.jpg" alt="CountUp archive ekranı" />
+        </div>
+
+        <!-- KOPYA (kesintisiz akış) -->
+        <div class="shot"><span class="label">About</span>
+          <img src="Screenshot_2025-12-22-21-28-55-541_com.example.countup.jpg" alt="CountUp About ekranı (kopya)" />
+        </div>
+        <div class="shot"><span class="label">My Counters</span>
+          <img src="Screenshot_2025-12-22-20-59-06-062_com.example.countup.jpg" alt="CountUp My Counters ekranı (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Cards</span>
+          <img src="Screenshot_2025-12-22-20-59-11-173_com.example.countup.jpg" alt="CountUp sayaç kartları (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Details</span>
+          <img src="Screenshot_2025-12-22-20-59-17-462_com.example.countup.jpg" alt="CountUp Counter Details ekranı (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Auto Reset</span>
+          <img src="Screenshot_2025-12-22-20-59-29-403_com.example.countup.jpg" alt="CountUp Auto Reset ayarları (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Full Screen</span>
+          <img src="Screenshot_2025-12-22-20-59-35-994_com.example.countup.jpg" alt="CountUp tam ekran sayaç (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Counter</span>
+          <img src="Screenshot_2025-12-22-20-59-41-043_com.example.countup.jpg" alt="CountUp counter ekranı (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Dark Mode</span>
+          <img src="Screenshot_2025-12-22-21-00-09-348_com.example.countup.jpg" alt="CountUp karanlık tema (kopya)" />
+        </div>
+        <div class="shot"><span class="label">Archive</span>
+          <img src="Screenshot_2025-12-22-21-00-15-519_com.example.countup.jpg" alt="CountUp archive ekranı (kopya)" />
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="sectionTitle reveal">
+      <div>
+        <h2>Hemen indir</h2>
+        <p>Uygulama canlıya geçtiğinde de aynı link geçerli olacak.</p>
+      </div>
+      <p class="tiny">© 2025 CountUp</p>
+    </div>
+
+    <div class="grid">
+      <article class="card reveal">
+        <h3>Kalıcı Play Store linki</h3>
+        <p>
+          Paket adı değişmediği sürece link sabit kalır.<br/>
+          <span class="tiny" id="storeLinkText"></span>
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <h3>Test / Live durumu</h3>
+        <p id="statusCardText">
+          Testteyken bazı hesaplar sayfayı göremeyebilir. Canlıya alınca herkes erişir.
+        </p>
+      </article>
+
+      <article class="card reveal">
+        <h3>İletişim</h3>
+        <p>
+          Mail: <a href="mailto:mobilboyut@gmail.com" style="text-decoration:underline;">mobilboyut@gmail.com</a><br/>
+          İstersen buraya sosyal link ekleyebilirsin.
+        </p>
+      </article>
+    </div>
+
+    <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;" class="reveal">
+      <a class="btn primary download-btn" href="#" target="_blank" rel="noopener">Download</a>
+      <a class="btn" href="#screens">Ekranlara göz at</a>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="footerRow">
+      <div>CountUp — A simple and powerful counter app.</div>
+      <div class="tiny">One-page promo • Smooth animations</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+  /******************************************************************
+   * 1) SADECE BURAYI DEĞİŞTİR:
+   *    "testing"  -> test süreci (banner görünür, metinler buna göre)
+   *    "live"     -> canlı (banner gizlenir, metinler güncellenir)
+   ******************************************************************/
+  const APP_STATUS = "testing"; // "testing" | "live"
+
+  /******************************************************************
+   * 2) PLAY STORE LINKİN (SABİT)
+   ******************************************************************/
+  const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.mobilboyut.countup";
+
+  // Download butonlarına linki bas
+  document.querySelectorAll(".download-btn").forEach(a => {
+    a.href = PLAY_STORE_URL;
+    a.setAttribute("aria-label", "Google Play'de indir");
+  });
+
+  // Link metnini göster
+  const storeLinkText = document.getElementById("storeLinkText");
+  storeLinkText.textContent = PLAY_STORE_URL;
+
+  // Test/Live banner kontrolü
+  const banner = document.getElementById("statusBanner");
+  const statusTitle = document.getElementById("statusTitle");
+  const statusText = document.getElementById("statusText");
+  const statusTag = document.getElementById("statusTag");
+  const statusCardText = document.getElementById("statusCardText");
+
+  if (APP_STATUS === "testing") {
+    banner.classList.remove("hide");
+    statusTitle.textContent = "Test sürümü yayında";
+    statusText.textContent =
+      "Uygulama şu an testte. Bu Play Store linki canlıya geçince de aynı kalır. " +
+      "Test kullanıcısı değilsen Play sayfası 'uygun değil' benzeri uyarı gösterebilir.";
+    statusTag.textContent = "TEST";
+    statusCardText.textContent =
+      "Testteyken sadece test listesinde olan kullanıcılar yükleyebilir. " +
+      "Canlıya alındığında aynı link üzerinden herkes erişir.";
+  } else {
+    banner.classList.add("hide");
+    statusCardText.textContent =
+      "Uygulama canlıda. Aynı Play Store linki üzerinden herkes indirebilir.";
+  }
+
+  // Reveal on scroll
+  const revealEls = document.querySelectorAll('.reveal');
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) e.target.classList.add('show');
+    });
+  }, { threshold: 0.12 });
+  revealEls.forEach(el => io.observe(el));
+
+  // Marquee hızını ekran genişliğine göre ayarla
+  const track = document.getElementById('track');
+  function tuneSpeed(){
+    const w = window.innerWidth || 1200;
+    const seconds = Math.round(Math.max(22, Math.min(36, 36 - (w - 360) / 80)));
+    track.style.animationDuration = seconds + 's';
+  }
+  tuneSpeed();
+  window.addEventListener('resize', tuneSpeed);
+</script>
+</body>
+</html>
